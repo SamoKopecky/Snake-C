@@ -2,39 +2,36 @@
 #include <stdbool.h>
 #include <time.h>
 
-int playgroundX = 10;
-int playgroundY = 10;
+char playground[10][10];
 
-void createPlayground(char playground[][10]) {
-    for (int x = 0; x < playgroundX; ++x) {
-        for (int y = 0; y < playgroundY; ++y) {
+void createPlayground() {
+    for (int x = 0; x < sizeof(playground)/ sizeof(playground[0]); ++x) {
+        for (int y = 0; y < sizeof(playground[0]); ++y) {
             playground[x][y] = '*';
         }
     }
 }
 
-void printPlayground(char playground[][10]) {
-    for (int x = 0; x < playgroundX; ++x) {
+void printPlayground() {
+    for (int x = 0; x < sizeof(playground)/ sizeof(playground[0]); ++x) {
         printf("\n");
-        for (int y = 0; y < playgroundY; ++y) {
+        for (int y = 0; y < sizeof(playground[0]); ++y) {
             printf("%c", playground[x][y]);
-
         }
     }
+    printf("\n");
 }
 
 int main() {
-    char playground[10][10];
-    createPlayground(playground);
-    printPlayground(playground);
+    createPlayground();
+    printPlayground();
     unsigned long currentTime = time(NULL) + 1;
 
     while(true) {
         if (currentTime == time(NULL)) {
             currentTime = time(NULL) + 1;
-            printf("test\n");
+            printPlayground();
         }
     }
 
-    return 0;
 }

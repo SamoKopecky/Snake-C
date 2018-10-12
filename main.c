@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include <time.h>
 
 int playgroundX = 10;
@@ -26,11 +27,14 @@ int main() {
     char playground[10][10];
     createPlayground(playground);
     printPlayground(playground);
-    //unsigned long currentTime = time(NULL);
-    //do {
+    unsigned long currentTime = time(NULL) + 1;
 
-    //}while (true);
-
+    while(true) {
+        if (currentTime == time(NULL)) {
+            currentTime = time(NULL) + 1;
+            printf("test\n");
+        }
+    }
 
     return 0;
 }

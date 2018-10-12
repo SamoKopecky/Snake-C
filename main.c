@@ -3,6 +3,8 @@
 #include <time.h>
 
 char playground[10][10];
+int snakeY = 0;
+int snakeX = 0;
 
 void createPlayground() {
     for (int x = 0; x < sizeof(playground)/ sizeof(playground[0]); ++x) {
@@ -22,15 +24,36 @@ void printPlayground() {
     printf("\n");
 }
 
+void updateSnake() {
+    snakeY++;
+    snakeX++;
+
+}
+
+void updatePlayground() {
+    for (int x = 0; x < sizeof(playground)/ sizeof(playground[0]); ++x) {
+        for (int y = 0; y < sizeof(playground[0]); ++y) {
+            if (y == snakeY && x == snakeX) {
+                playground[x][y] = 'O';
+            } else {
+                playground[x][y] = '*';
+            }
+        }
+    }
+}
+
 int main() {
-    createPlayground();
+    updatePlayground();
     printPlayground();
+
     unsigned long currentTime = time(NULL) + 1;
 
     while(true) {
         if (currentTime == time(NULL)) {
-            currentTime = time(NULL) + 1;
+            updateSnake();
+            updatePlayground();
             printPlayground();
+            currentTime = time(NULL) + 1;
         }
     }
 

@@ -36,20 +36,36 @@ bool checkForSnakeCoordinates(int x, int y) {
     return returnValue;
 }
 
-bool checkForPlaygroundBorder(int x, int y) {
-    if (x == 0 ||
-        x == sizeof(playground) / sizeof(playground[0]) - 1 ||
-        y == 0 ||
-        y == sizeof(playground[0]) - 1) {
-        return true;
+char checkForPlaygroundBorder(int x, int y) {
+    if (x == 0) {
+        return 'l';
     }
-    return false;
+    if (x == sizeof(playground) / sizeof(playground[0]) - 1) {
+        return 'r';
+    }
+    if (y == 0) {
+        return 'u';
+    }
+    if (y == sizeof(playground[0]) - 1) {
+        return 'd';
+    }
+    return 'f';
+}
+
+void wrapSnake(int x, int y) {
+    for (int i = sizeof(snakeCords) / sizeof(snakeCords[0]); i > 0; --i) {
+        if (checkForPlaygroundBorder(i, y))
+    }
+    if (checkForPlaygroundBorder(x, y) == 'r') {
+        printf("test");
+        snakeCords[i][0] -= snakeCords[0][0];
+    }
 }
 
 char getCorrectCharacter(int x, int y) {
-    if (checkForPlaygroundBorder(x, y)) {
+    if (checkForPlaygroundBorder(x, y) != 'f') {
         return '*';
-    } else if (checkForSnakeCoordinates(x, y) ) {
+    } else if (checkForSnakeCoordinates(x, y)) {
         return 'O';
     } else {
         return ' ';
@@ -59,14 +75,15 @@ char getCorrectCharacter(int x, int y) {
 void updatePlayground() {
     for (int x = 0; x < sizeof(playground) / sizeof(playground[0]); ++x) {
         for (int y = 0; y < sizeof(playground[0]); ++y) {
+            wrapSnake(x, y);
             playground[x][y] = getCorrectCharacter(x, y);
         }
     }
 }
 
 int main() {
-    updatePlayground();
-    printPlayground();
+    //updatePlayground();
+    //printPlayground();
 
     unsigned long currentTime = time(NULL) + delay;
 

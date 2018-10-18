@@ -2,9 +2,8 @@
 #include <stdbool.h>
 #include <time.h>
 
-char playground[10][10];
-int snakeY = 0;
-int snakeX = 0;
+char playground[25][50];
+int snakeLenght = 2;
 
 void createPlayground() {
     for (int x = 0; x < sizeof(playground)/ sizeof(playground[0]); ++x) {
@@ -25,22 +24,31 @@ void printPlayground() {
 }
 
 void updateSnake() {
-    snakeY++;
-    snakeX++;
+    //snakeY++;
+    //snakeX++;
 
 }
+
+bool checkForSnakeCoordinates(int x, int y) {
+    return false;
+};
 
 void updatePlayground() {
     for (int x = 0; x < sizeof(playground)/ sizeof(playground[0]); ++x) {
         for (int y = 0; y < sizeof(playground[0]); ++y) {
-            if (y == snakeY && x == snakeX) {
+            if (checkForSnakeCoordinates(x, y)) {
                 playground[x][y] = 'O';
-            } else {
+            }
+            if (x == 0 || x == sizeof(playground) / sizeof(playground[0]) - 1 || y == 0 || y == sizeof(playground[0]) - 1) {
                 playground[x][y] = '*';
+            }
+            else {
+                playground[x][y] = ' ';
             }
         }
     }
 }
+
 
 int main() {
     updatePlayground();

@@ -7,7 +7,7 @@ int snakeLenght = 2;
 
 void createPlayground() {
     for (int x = 0; x < sizeof(playground)/ sizeof(playground[0]); ++x) {
-        for (int y = 0; y < sizeof(playground[0]); ++y) {
+        for (int y = 0; y < sizeof(playground[0]) / sizeof(playground[0][0]); ++y) {
             playground[x][y] = '*';
         }
     }
@@ -16,7 +16,7 @@ void createPlayground() {
 void printPlayground() {
     for (int x = 0; x < sizeof(playground)/ sizeof(playground[0]); ++x) {
         printf("\n");
-        for (int y = 0; y < sizeof(playground[0]); ++y) {
+        for (int y = 0; y < sizeof(playground[0]) / sizeof(playground[0][0]); ++y) {
             printf("%c", playground[x][y]);
         }
     }

@@ -3,11 +3,15 @@
 #include <time.h>
 
 char playground[25][50];
-int snakeCords[5][2] = {{2,2},{2,3},{2,4},{2,5},{2,6}};
+int snakeCords[5][2] = {{2, 2},
+                        {2, 3},
+                        {2, 4},
+                        {2, 5},
+                        {2, 6}};
 int delay = 1;
 
 void printPlayground() {
-    for (int x = 0; x < sizeof(playground)/ sizeof(playground[0]); ++x) {
+    for (int x = 0; x < sizeof(playground) / sizeof(playground[0]); ++x) {
         printf("\n");
         for (int y = 0; y < sizeof(playground[0]) / sizeof(playground[0][0]); ++y) {
             printf("%c", playground[x][y]);
@@ -32,21 +36,33 @@ bool checkForSnakeCoordinates(int x, int y) {
     return returnValue;
 }
 
-void updatePlayground() {
-    for (int x = 0; x < sizeof(playground)/ sizeof(playground[0]); ++x) {
-        for (int y = 0; y < sizeof(playground[0]); ++y) {
-                if (checkForSnakeCoordinates(x, y)) {
-                    playground[x][y] = 'O';
-                } else {
-                    playground[x][y] = ' ';
-                }
-            if (x == 0 || x == sizeof(playground) / sizeof(playground[0]) - 1 || y == 0 || y == sizeof(playground[0]) - 1) {
-                playground[x][y] = '*';
-            }
-        }
+bool checkForPlaygroundBorder(int x, int y) {
+    if (x == 0 ||
+        x == sizeof(playground) / sizeof(playground[0]) - 1 ||
+        y == 0 ||
+        y == sizeof(playground[0]) - 1) {
+        return true;
+    }
+    return false;
+}
+
+char getCorrectCharacter(int x, int y) {
+    if (checkForPlaygroundBorder(x, y)) {
+        return '*';
+    } else if (checkForSnakeCoordinates(x, y) ) {
+        return 'O';
+    } else {
+        return ' ';
     }
 }
 
+void updatePlayground() {
+    for (int x = 0; x < sizeof(playground) / sizeof(playground[0]); ++x) {
+        for (int y = 0; y < sizeof(playground[0]); ++y) {
+            playground[x][y] = getCorrectCharacter(x, y);
+        }
+    }
+}
 
 int main() {
     updatePlayground();

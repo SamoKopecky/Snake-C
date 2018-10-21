@@ -10,6 +10,7 @@ int snakeCords[5][2] = {{2, 2},
                         {2, 4},
                         {2, 5},
                         {2, 6}};
+int appleCords[1][2] = {{2, 8}};
 int delay = 1;
 
 char checkForPlaygroundBorder(int x, int y) {
@@ -28,25 +29,44 @@ char checkForPlaygroundBorder(int x, int y) {
     return 'f';
 }
 
+void checkForAppleForSnake() {
+    int snakeHead[2] = {snakeCords[sizeof(snakeCords) / sizeof(snakeCords[0]) - 1][0],
+                        snakeCords[sizeof(snakeCords) / sizeof(snakeCords[0]) - 1][1]};
 
-void checkSnakeWrap() {
-    for (int i = 0; i < sizeof(snakeCords) / sizeof(snakeCords[0]); ++i) {
-        //printf("%d-", snakeCords[i][0]);
-        //printf("%d ", snakeCords[i][1]);
-        //printf("%c", checkForPlaygroundBorder(snakeCords[i][0], snakeCords[i][1]));
-        if (checkForPlaygroundBorder(snakeCords[i][0], snakeCords[i][1]) == 'r') {
-            snakeCords[i][1] = 1;
-        }
-        if (checkForPlaygroundBorder(snakeCords[i][0], snakeCords[i][1]) == 'l') {
-            snakeCords[i][1] = playgroundWidth - 2;
-        }
-        if (checkForPlaygroundBorder(snakeCords[i][0], snakeCords[i][1]) == 'd') {
-            snakeCords[i][0] = 1;
-        }
-        if (checkForPlaygroundBorder(snakeCords[i][0], snakeCords[i][1]) == 'u') {
-            snakeCords[i][0] = playgroundHeight - 2;
+    //printf("x%d, y:%d", snakeHead[0], snakeHead[1]);
+    for (int i = 0; i < sizeof(appleCords) / sizeof(appleCords[0]); ++i) {
+        if (snakeHead[0] == appleCords[i][0] && snakeHead[1] == appleCords[i][1]) {
+            // TODO
         }
     }
+}
+
+bool checkForAppleForPlayground(int x, int y) {
+    for (int i = 0; i < sizeof(appleCords) / sizeof(appleCords[0]); ++i) {
+        if (appleCords[i][0] == x && appleCords[i][1] == y) {
+            return true;
+        }
+        return false;
+    }
+}
+
+void checkForSnakeWrap(int i) {
+    //printf("%d-", snakeCords[i][0]);
+    //printf("%d ", snakeCords[i][1]);
+    //printf("%c", checkForPlaygroundBorder(snakeCords[i][0], snakeCords[i][1]));
+    if (checkForPlaygroundBorder(snakeCords[i][0], snakeCords[i][1]) == 'r') {
+        snakeCords[i][1] = 1;
+    }
+    if (checkForPlaygroundBorder(snakeCords[i][0], snakeCords[i][1]) == 'l') {
+        snakeCords[i][1] = playgroundWidth - 2;
+    }
+    if (checkForPlaygroundBorder(snakeCords[i][0], snakeCords[i][1]) == 'd') {
+        snakeCords[i][0] = 1;
+    }
+    if (checkForPlaygroundBorder(snakeCords[i][0], snakeCords[i][1]) == 'u') {
+        snakeCords[i][0] = playgroundHeight - 2;
+    }
+
 }
 
 void printPlayground() {
@@ -63,9 +83,12 @@ void updateSnake() {
     for (int i = 0; i < sizeof(snakeCords) / sizeof(snakeCords[0]); ++i) {
         snakeCords[i][1]++;
     }
-    checkSnakeWrap();
-}
+    for (int i = 0; i < sizeof(snakeCords) / sizeof(snakeCords[0]); ++i) {
+        checkForSnakeWrap(i);
+        //checkForAppleForSnake();
+    }
 
+}
 
 bool checkForSnakeCoordinates(int x, int y) {
     bool returnValue = false;
@@ -82,6 +105,8 @@ char getCorrectCharacter(int x, int y) {
         return '*';
     } else if (checkForSnakeCoordinates(x, y)) {
         return 'O';
+    } else if (checkForAppleForPlayground(x, y)) {
+        return 'A';
     } else {
         return ' ';
     }

@@ -29,31 +29,16 @@ char checkForPlaygroundBorder(int x, int y) {
     return 'f';
 }
 
-void checkForAppleForSnake() {
-    int snakeHead[2] = {snakeCords[sizeof(snakeCords) / sizeof(snakeCords[0]) - 1][0],
-                        snakeCords[sizeof(snakeCords) / sizeof(snakeCords[0]) - 1][1]};
-
-    //printf("x%d, y:%d", snakeHead[0], snakeHead[1]);
-    for (int i = 0; i < sizeof(appleCords) / sizeof(appleCords[0]); ++i) {
-        if (snakeHead[0] == appleCords[i][0] && snakeHead[1] == appleCords[i][1]) {
-            // TODO
-        }
-    }
-}
-
-bool checkForAppleForPlayground(int x, int y) {
+bool checkForApple(int x, int y) {
     for (int i = 0; i < sizeof(appleCords) / sizeof(appleCords[0]); ++i) {
         if (appleCords[i][0] == x && appleCords[i][1] == y) {
             return true;
         }
-        return false;
     }
+    return false;
 }
 
 void checkForSnakeWrap(int i) {
-    //printf("%d-", snakeCords[i][0]);
-    //printf("%d ", snakeCords[i][1]);
-    //printf("%c", checkForPlaygroundBorder(snakeCords[i][0], snakeCords[i][1]));
     if (checkForPlaygroundBorder(snakeCords[i][0], snakeCords[i][1]) == 'r') {
         snakeCords[i][1] = 1;
     }
@@ -79,15 +64,22 @@ void printPlayground() {
     printf("\n");
 }
 
+void addAppleToSnake() {
+    // TODO
+}
+
 void updateSnake() {
     for (int i = 0; i < sizeof(snakeCords) / sizeof(snakeCords[0]); ++i) {
         snakeCords[i][1]++;
     }
     for (int i = 0; i < sizeof(snakeCords) / sizeof(snakeCords[0]); ++i) {
         checkForSnakeWrap(i);
-        //checkForAppleForSnake();
     }
-
+    int snakeHead[2] = {snakeCords[sizeof(snakeCords) / sizeof(snakeCords[0]) - 1][0],
+                        snakeCords[sizeof(snakeCords) / sizeof(snakeCords[0]) - 1][1]};
+    if (checkForApple(snakeHead[0], snakeHead[1])) {
+        addAppleToSnake();
+    }
 }
 
 bool checkForSnakeCoordinates(int x, int y) {
@@ -105,7 +97,7 @@ char getCorrectCharacter(int x, int y) {
         return '*';
     } else if (checkForSnakeCoordinates(x, y)) {
         return 'O';
-    } else if (checkForAppleForPlayground(x, y)) {
+    } else if (checkForApple(x, y)) {
         return 'A';
     } else {
         return ' ';

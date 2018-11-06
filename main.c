@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <time.h>
+#include <stdlib.h>
+#include <conio.h>
+
+#define READ_FILE "prekazky.txt"
 
 char playground[25][50];
 int playgroundHeight = sizeof(playground) / sizeof(playground[0]);
@@ -12,46 +16,67 @@ int snakeCords[5][2] = {{2, 2},
                         {2, 6}};
 int appleCords[1][2] = {{2, 8}};
 int delay = 1;
+char inputKey;
+char direction;
+bool gameOver = false;
+int obstacleArray[10][2];
 
-char checkForPlaygroundBorder(int x, int y) {
-    if (x == 0) {
-        return 'u';
-    }
-    if (x == playgroundHeight - 1) {
-        return 'd';
-    }
-    if (y == 0) {
-        return 'l';
-    }
-    if (y == playgroundWidth - 1) {
-        return 'r';
-    }
-    return 'f';
-}
-
-bool checkForApple(int x, int y) {
-    for (int i = 0; i < sizeof(appleCords) / sizeof(appleCords[0]); ++i) {
-        if (appleCords[i][0] == x && appleCords[i][1] == y) {
+bool checkForObstacles(int x, int y) {
+    for (int j = 0; j < 10; ++j) {
+        if (obstacleArray[j][1] == x && obstacleArray[j][0] == y) {
             return true;
         }
     }
     return false;
 }
 
-void checkForSnakeWrap(int i) {
-    if (checkForPlaygroundBorder(snakeCords[i][0], snakeCords[i][1]) == 'r') {
-        snakeCords[i][1] = 1;
+void importObstacles() {
+    FILE *file;
+    int i = 0;
+
+    file = fopen(READ_FILE, "r");
+
+    for (int j = 0; j < 10; ++j) {
+        for (int k = 0; k < 2; ++k) {
+            fscanf(file, "%d", &i);
+            obstacleArray[j][k] = i;
+        }
     }
-    if (checkForPlaygroundBorder(snakeCords[i][0], snakeCords[i][1]) == 'l') {
-        snakeCords[i][1] = playgroundWidth - 2;
-    }
-    if (checkForPlaygroundBorder(snakeCords[i][0], snakeCords[i][1]) == 'd') {
-        snakeCords[i][0] = 1;
-    }
-    if (checkForPlaygroundBorder(snakeCords[i][0], snakeCords[i][1]) == 'u') {
-        snakeCords[i][0] = playgroundHeight - 2;
+    fclose(file);
+}
+
+void changeDirection() {
+    for (int i = 0; i < sizeof(snakeCords) / sizeof(snakeCords[0]); ++i) {
+        if (inputKey == 'w') {
+            direction = 'w';
+        }
+        if (inputKey == 's') {
+            direction = 's';
+        }
+        if (inputKey == 'd') {
+            direction = 'd';
+        }
+        if (inputKey == 'a') {
+            direction = 'a';
+        }
     }
 
+}
+
+char checkForPlaygroundBorder(int x, int y) {
+    if (x == 0 || x == playgroundHeight - 1 || y == 0 || y == playgroundWidth - 1) {
+        return 't';
+    }
+    return 'f';
+}
+
+bool checkForAppleForPlayground(int x, int y) {
+    for (int i = 0; i < sizeof(appleCords) / sizeof(appleCords[0]); ++i) {
+        if (appleCords[i][0] == x && appleCords[i][1] == y) {
+            return true;
+        }
+        return false;
+    }
 }
 
 void printPlayground() {
@@ -64,22 +89,28 @@ void printPlayground() {
     printf("\n");
 }
 
-void addAppleToSnake() {
-    // TODO
-}
-
 void updateSnake() {
+    changeDirection();
+    //for (int j = 0; j < sizeof(snakeCords) / sizeof(snakeCords[0]); ++j) {
+    if (direction == 'w') {
+        snakeCords[4][0]--;
+    }
+    if (direction == 's') {
+        snakeCords[4][0]++;
+    }
+    if (direction == 'd') {
+        snakeCords[4][1]++;
+    }
+    if (direction == 'a') {
+        snakeCords[4][1]--;
+    }
+    //}
     for (int i = 0; i < sizeof(snakeCords) / sizeof(snakeCords[0]); ++i) {
-        snakeCords[i][1]++;
+        if (checkForPlaygroundBorder(snakeCords[i][0], snakeCords[i][1]) == 't') {
+            gameOver = true;
+        }
     }
-    for (int i = 0; i < sizeof(snakeCords) / sizeof(snakeCords[0]); ++i) {
-        checkForSnakeWrap(i);
-    }
-    int snakeHead[2] = {snakeCords[sizeof(snakeCords) / sizeof(snakeCords[0]) - 1][0],
-                        snakeCords[sizeof(snakeCords) / sizeof(snakeCords[0]) - 1][1]};
-    if (checkForApple(snakeHead[0], snakeHead[1])) {
-        addAppleToSnake();
-    }
+
 }
 
 bool checkForSnakeCoordinates(int x, int y) {
@@ -95,10 +126,12 @@ bool checkForSnakeCoordinates(int x, int y) {
 char getCorrectCharacter(int x, int y) {
     if (checkForPlaygroundBorder(x, y) != 'f') {
         return '*';
+    } else if (checkForObstacles(x, y)) {
+        return 'X';
+    } else if (checkForAppleForPlayground(x, y)) {
+        return 'A';
     } else if (checkForSnakeCoordinates(x, y)) {
         return 'O';
-    } else if (checkForApple(x, y)) {
-        return 'A';
     } else {
         return ' ';
     }
@@ -112,19 +145,32 @@ void updatePlayground() {
     }
 }
 
+
 int main() {
     updatePlayground();
     printPlayground();
+    importObstacles();
 
+    printf("test");
     unsigned long currentTime = time(NULL) + delay;
 
     while (true) {
+        if (gameOver == true) {
+            system("cls");
+            printf("GAME OVER");
+            break;
+        }
         if (currentTime == time(NULL)) {
+            printf("test");
+            system("cls");
             updateSnake();
             updatePlayground();
             printPlayground();
             currentTime = time(NULL) + delay;
+            if (kbhit()) {
+                inputKey = getch();
+            }
         }
     }
-
+    getchar();
 }

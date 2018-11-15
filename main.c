@@ -3,42 +3,59 @@
 #include <time.h>
 #include <stdlib.h>
 #include <conio.h>
+#include <afxres.h>
 
+#define OBSTACLE 176
+#define APPLE 254
+#define SNAKE 248
+#define HORIZONTAL_LINE 205
+#define VERTICAL_LINE 186
+#define UPPER_LEFT_CORNER 187
+#define LOWER_LEFT_CORNER 188
+#define UPPER_RIGHT_CORNER 201
+#define LOWER_RIGHT_CORNER 200
+
+#define SNAKE_LENGTH_ON_START 5
 #define READ_FILE "prekazky.txt"
 #define WRITE_FILE "rebricek_hracov.txt"
 
 char playground[25][50];
 int playgroundHeight = sizeof(playground) / sizeof(playground[0]);
 int playgroundWidth = sizeof(playground[0]) / sizeof(playground[0][0]);
+
 int appleCords[8][2];
-int appleCordsLenght = sizeof(appleCords) / sizeof(appleCords[0]);
+int appleCordsLength = sizeof(appleCords) / sizeof(appleCords[0]);
 struct twoDArray {
     int count;
     int **rows;
-} snakeCords2D;
+} snakeCords;
+
 char inputKey;
 char direction;
+
 bool gameOver = false;
-int obstacleArray[5][2];
+
+int obstacleArray[52][2];
 int obstacleArrayLength = sizeof(obstacleArray) / sizeof(obstacleArray[0]);
+
 int score = 0;
 char playerName[10];
-struct highScores {
-    char meno[10];
+
+struct players {
+    char name[10];
     int score;
-} currentPlayer;
-struct highScores arrayOfScores[10];
+} currentPlayer, arrayOfTop10Players[10];
 
 void randomApples() {
     srand(1000 * (unsigned) time(NULL));
-    for (int i = 0; i < appleCordsLenght; ++i) {
+    for (int i = 0; i < appleCordsLength; ++i) {
         appleCords[i][0] = rand() % 49 + 1;
         appleCords[i][1] = rand() % 24 + 1;
     }
 }
 
 bool isApple(int x, int y) {
-    for (int i = 0; i < sizeof(appleCords) / sizeof(appleCords[0]); ++i) {
+    for (int i = 0; i < appleCordsLength; ++i) {
         if (appleCords[i][0] == x && appleCords[i][1] == y) {
             return true;
         }
@@ -47,20 +64,21 @@ bool isApple(int x, int y) {
 }
 
 void firstAlloc() {
-    snakeCords2D.count = 5;
-    snakeCords2D.rows = (int **) malloc(5 * sizeof(int) * 2);
-    for (int i = 0; i < snakeCords2D.count; ++i) {
-        snakeCords2D.rows[i] = (int *) malloc(2 * sizeof(int));
+    int i;
+    snakeCords.count = SNAKE_LENGTH_ON_START;
+    snakeCords.rows = (int **) malloc(5 * sizeof(int) * 2);
+    for (i = 0; i < snakeCords.count; ++i) {
+        snakeCords.rows[i] = (int *) malloc(2 * sizeof(int));
     }
-    for (int j = 0; j < snakeCords2D.count; ++j) {
-        snakeCords2D.rows[j][0] = j + 2;
-        snakeCords2D.rows[j][1] = 2;
+    for (i = 0; i < snakeCords.count; ++i) {
+        snakeCords.rows[i][0] = i + 2;
+        snakeCords.rows[i][1] = 2;
     }
 }
 
 bool isSnakeBody(int x, int y) {
-    for (int i = 0; i < snakeCords2D.count - 2; ++i) {
-        if (snakeCords2D.rows[i][0] == x && snakeCords2D.rows[i][1] == y) {
+    for (int i = 0; i < snakeCords.count - 2; ++i) {
+        if (snakeCords.rows[i][0] == x && snakeCords.rows[i][1] == y) {
             return true;
         }
     }
@@ -77,8 +95,8 @@ bool isObstacle(int x, int y) {
 }
 
 bool isSnake(int x, int y) {
-    for (int i = 0; i < snakeCords2D.count; ++i) {
-        if (x == snakeCords2D.rows[i][0] && y == snakeCords2D.rows[i][1]) {
+    for (int i = 0; i < snakeCords.count; ++i) {
+        if (x == snakeCords.rows[i][0] && y == snakeCords.rows[i][1]) {
             return true;
         }
     }
@@ -94,21 +112,18 @@ bool isBorder(int x, int y) {
 
 void importObstacles() {
     FILE *file;
-    int i = 0;
-
     file = fopen(READ_FILE, "r");
-
-    for (int j = 0; j < obstacleArrayLength; ++j) {
-        fscanf(file, "%d,%d", &obstacleArray[j][0], &obstacleArray[j][1]);
+    for (int i = 0; i < obstacleArrayLength; ++i) {
+        fscanf(file, "%d,%d", &obstacleArray[i][0], &obstacleArray[i][1]);
     }
     fclose(file);
 }
 
 void changeDirection() {
     if (!((inputKey == 'w' && direction == 's') ||
-        (inputKey == 's' && direction == 'w') ||
-        (inputKey == 'd' && direction == 'a') ||
-        (inputKey == 'a' && direction == 'd'))) {
+          (inputKey == 's' && direction == 'w') ||
+          (inputKey == 'd' && direction == 'a') ||
+          (inputKey == 'a' && direction == 'd'))) {
         if (inputKey == 'w') {
             direction = 'w';
         }
@@ -131,37 +146,33 @@ void printPlayground() {
             printf("%c", playground[y][x]);
         }
     }
-    printf("\nTvoje skore je : %d", score);
+    printf("\nSCORE : %d", score);
 }
 
 void updateSnake() {
     changeDirection();
 
-    if (direction) {
-        for (int j = 0; j <= snakeCords2D.count - 2; ++j) {
-            snakeCords2D.rows[j][0] = snakeCords2D.rows[j + 1][0];
-            snakeCords2D.rows[j][1] = snakeCords2D.rows[j + 1][1];
-        }
+    for (int i = 0; i <= snakeCords.count - 2; ++i) {
+        snakeCords.rows[i][0] = snakeCords.rows[i + 1][0];
+        snakeCords.rows[i][1] = snakeCords.rows[i + 1][1];
     }
 
     if (direction == 'w') {
-        snakeCords2D.rows[snakeCords2D.count - 1][1]--;
+        snakeCords.rows[snakeCords.count - 1][1]--;
     }
     if (direction == 's') {
-        snakeCords2D.rows[snakeCords2D.count - 1][1]++;
+        snakeCords.rows[snakeCords.count - 1][1]++;
     }
     if (direction == 'd') {
-        snakeCords2D.rows[snakeCords2D.count - 1][0]++;
+        snakeCords.rows[snakeCords.count - 1][0]++;
     }
     if (direction == 'a') {
-        snakeCords2D.rows[snakeCords2D.count - 1][0]--;
+        snakeCords.rows[snakeCords.count - 1][0]--;
     }
 
-    if (isBorder(snakeCords2D.rows[snakeCords2D.count - 1][0], snakeCords2D.rows[snakeCords2D.count - 1][1]) == true ||
-        isObstacle(snakeCords2D.rows[snakeCords2D.count - 1][0], snakeCords2D.rows[snakeCords2D.count - 1][1]) ==
-        true ||
-        isSnakeBody(snakeCords2D.rows[snakeCords2D.count - 1][0], snakeCords2D.rows[snakeCords2D.count - 1][1]) ==
-        true) {
+    if (isBorder(snakeCords.rows[snakeCords.count - 1][0], snakeCords.rows[snakeCords.count - 1][1]) == true ||
+        isObstacle(snakeCords.rows[snakeCords.count - 1][0], snakeCords.rows[snakeCords.count - 1][1]) == true ||
+        isSnakeBody(snakeCords.rows[snakeCords.count - 1][0], snakeCords.rows[snakeCords.count - 1][1]) == true) {
         gameOver = true;
     }
 
@@ -171,11 +182,11 @@ char getCorrectCharacter(int x, int y) {
     if (isBorder(x, y)) {
         return '*';
     } else if (isApple(x, y)) {
-        return 'A';
+        return APPLE;
     } else if (isObstacle(x, y)) {
-        return 'X';
+        return OBSTACLE;
     } else if (isSnake(x, y)) {
-        return 'O';
+        return SNAKE;
     } else {
         return ' ';
     }
@@ -196,39 +207,40 @@ void getPlayerName() {
     system("cls");
 }
 
-void addCurrentPlayerToTop10(int i) {
-    for (int j = 9; j >= i; --j) {
-        arrayOfScores[j + 1] = arrayOfScores[j];
-
+void addCurrentPlayerToTop10(int indexOfPlayer) {
+    int i;
+    for (i = 9; i >= indexOfPlayer; --i) {
+        arrayOfTop10Players[i + 1] = arrayOfTop10Players[i];
     }
-    arrayOfScores[i].score = currentPlayer.score;
-    for (int k = 0; k < 10; ++k) {
-        arrayOfScores[i].meno[k] = currentPlayer.meno[k];
+    arrayOfTop10Players[indexOfPlayer].score = currentPlayer.score;
+    for (i = 0; i < 10; ++i) {
+        arrayOfTop10Players[indexOfPlayer].name[i] = currentPlayer.name[i];
     }
 }
 
-void writeToFile() {
+void updateTop10List() {
+    int i;
     currentPlayer.score = score;
-    for (int k = 0; k < 10; ++k) {
-        currentPlayer.meno[k] = playerName[k];
+    for (i = 0; i < 10; ++i) {
+        currentPlayer.name[i] = playerName[i];
     }
     FILE *file;
     file = fopen(WRITE_FILE, "r");
-    for (int i = 0; i < 10; ++i) {
-        fscanf(file, "%s ", arrayOfScores[i].meno);
+    for (i = 0; i < 10; ++i) {
+        fscanf(file, "%s ", arrayOfTop10Players[i].name);
         fseek(file, 17, SEEK_CUR);
-        fscanf(file, "%d", &arrayOfScores[i].score);
+        fscanf(file, "%d", &arrayOfTop10Players[i].score);
     }
-    for (int k = 0; k < 10; ++k) {
-        if (arrayOfScores[k].score < currentPlayer.score) {
-            addCurrentPlayerToTop10(k);
+    for (i = 0; i < 10; ++i) {
+        if (arrayOfTop10Players[i].score < currentPlayer.score) {
+            addCurrentPlayerToTop10(i);
             break;
         }
     }
     fclose(file);
     file = fopen(WRITE_FILE, "w");
-    for (int j = 0; j < 10; ++j) {
-        fprintf(file, "%s dosiahol skore : %d\n", arrayOfScores[j].meno, arrayOfScores[j].score);
+    for (i = 0; i < 10; ++i) {
+        fprintf(file, "%s dosiahol skore : %d\n", arrayOfTop10Players[i].name, arrayOfTop10Players[i].score);
     }
     fclose(file);
 }
@@ -236,49 +248,69 @@ void writeToFile() {
 void writeOutTop10() {
     printf("\n");
     for (int i = 0; i < 10; ++i) {
-        printf("%s dosiahol skore : %d\n", arrayOfScores[i].meno, arrayOfScores[i].score);
+        printf("%s dosiahol skore : %d\n", arrayOfTop10Players[i].name, arrayOfTop10Players[i].score);
     }
 }
 
-void changeSize() {
-    if (isApple(snakeCords2D.rows[snakeCords2D.count - 1][0], snakeCords2D.rows[snakeCords2D.count - 1][1])) {
+void printInstructions() {
+    printf("Pohyb : W -> hore, S -> dole, D -> doprava, A -> dolava.\n");
+    printf("Ak zjes jablko pripocita sa ti 1 k tvojmu skore.\n");
+    printf("Kolizia zo stenou hracej plochy, z prekazkami a telom hada ukoncia hru a ulozia skore.\n");
+    printf("Had -> %c\n", SNAKE);
+    printf("Jablko -> %c\n", APPLE);
+    printf("Stena hracej plochy -> %c\n", OBSTACLE);
+    printf("Po zadani tvojho mena sa hra zacne !\n");
+}
+
+void eatApple() {
+    int i;
+    if (isApple(snakeCords.rows[snakeCords.count - 1][0], snakeCords.rows[snakeCords.count - 1][1])) {
         int **temp;
-        temp = (int **) malloc(snakeCords2D.count * sizeof(int) * 2);
-        for (int j = 0; j < snakeCords2D.count; ++j) {
-            temp[j] = (int *) malloc(2 * sizeof(int));
+        temp = (int **) malloc(snakeCords.count * sizeof(int) * 2);
+        for (i = 0; i < snakeCords.count; ++i) {
+            temp[i] = (int *) malloc(2 * sizeof(int));
         }
-        for (int m = 0; m < snakeCords2D.count; ++m) {
-            temp[m][0] = snakeCords2D.rows[m][0];
-            temp[m][1] = snakeCords2D.rows[m][1];
+        for (i = 0; i < snakeCords.count; ++i) {
+            temp[i][0] = snakeCords.rows[i][0];
+            temp[i][1] = snakeCords.rows[i][1];
         }
-        free(snakeCords2D.rows);
+        free(snakeCords.rows);
         score++;
-        snakeCords2D.count++;
-        snakeCords2D.rows = (int **) malloc(snakeCords2D.count * sizeof(int) * 2);
-        for (int i = 0; i < snakeCords2D.count; ++i) {
-            snakeCords2D.rows[i] = (int *) malloc(2 * sizeof(int));
+        snakeCords.count++;
+        snakeCords.rows = (int **) malloc(snakeCords.count * sizeof(int) * 2);
+        for (i = 0; i < snakeCords.count; ++i) {
+            snakeCords.rows[i] = (int *) malloc(2 * sizeof(int));
         }
 
-        for (int k = 1; k < snakeCords2D.count; ++k) {
-            snakeCords2D.rows[k][0] = temp[k - 1][0];
-            snakeCords2D.rows[k][1] = temp[k - 1][1];
+        for (i = 1; i < snakeCords.count; ++i) {
+            snakeCords.rows[i][0] = temp[i - 1][0];
+            snakeCords.rows[i][1] = temp[i - 1][1];
         }
 
-        if (snakeCords2D.rows[2][0] - 1 == snakeCords2D.rows[1][0]) {
-            snakeCords2D.rows[0][0] = snakeCords2D.rows[1][0] - 1;
-            snakeCords2D.rows[0][1] = snakeCords2D.rows[1][1];
+        if (snakeCords.rows[2][0] - 1 == snakeCords.rows[1][0]) {
+            snakeCords.rows[0][0] = snakeCords.rows[1][0] - 1;
+            snakeCords.rows[0][1] = snakeCords.rows[1][1];
+        } else if (snakeCords.rows[2][0] + 1 == snakeCords.rows[1][0]) {
+            snakeCords.rows[0][0] = snakeCords.rows[1][0] + 1;
+            snakeCords.rows[0][1] = snakeCords.rows[1][1];
+        } else if (snakeCords.rows[2][1] - 1 == snakeCords.rows[1][1]) {
+            snakeCords.rows[0][0] = snakeCords.rows[1][0];
+            snakeCords.rows[0][1] = snakeCords.rows[1][1] - 1;
+        } else if (snakeCords.rows[2][1] + 1 == snakeCords.rows[1][1]) {
+            snakeCords.rows[0][0] = snakeCords.rows[1][0];
+            snakeCords.rows[0][1] = snakeCords.rows[1][1] + 1;
         }
+
         srand(1000 * (unsigned) time(NULL));
         int index = 2;
 
-        for (int l = 0; l < 8; ++l) {
-            if (snakeCords2D.rows[snakeCords2D.count - 1][0] == appleCords[l][0] &&
-                snakeCords2D.rows[snakeCords2D.count - 1][1] == appleCords[l][1]) {
-                index = l;
+        for (i = 0; i < 8; ++i) {
+            if (snakeCords.rows[snakeCords.count - 1][0] == appleCords[i][0] &&
+                snakeCords.rows[snakeCords.count - 1][1] == appleCords[i][1]) {
+                index = i;
                 break;
             }
         }
-
         appleCords[index][0] = rand() % 49 + 1;
         appleCords[index][1] = rand() % 24 + 1;
 
@@ -288,6 +320,7 @@ void changeSize() {
 }
 
 int main() {
+    printInstructions();
     direction = 'd';
     firstAlloc();
     getPlayerName();
@@ -298,22 +331,37 @@ int main() {
 
     struct timespec tim;
     tim.tv_sec = 0;
-    tim.tv_nsec = 250000000;
-    while (!gameOver) {
+    tim.tv_nsec = 500000000;
+    while (true) {
         if (kbhit()) {
             inputKey = getch();
         }
         nanosleep(&tim, NULL);
-        system("cls");
+        system("CLS");
         updateSnake();
-        changeSize();
+        if (gameOver) {
+            break;
+        }
+        eatApple();
         updatePlayground();
         printPlayground();
 
     }
     system("cls");
-    printf("GAME OVER");
-    writeToFile();
+    char line[11];
+    for (int i = 0; i < 11; ++i) {
+        line[i] = HORIZONTAL_LINE;
+    }
+    printf("%c%s%c", UPPER_RIGHT_CORNER, line, UPPER_LEFT_CORNER);
+    printf("\n%c GAME OVER %c\n", VERTICAL_LINE, VERTICAL_LINE);
+    printf("%c%s%c", LOWER_RIGHT_CORNER, line, LOWER_LEFT_CORNER);
+    updateTop10List();
     writeOutTop10();
     getch();
 }
+
+/*
+ * TODO: jablka abi sa nezobrazovali na prekazkach ani na snakovi
+ * TODO: zmenit velkost pola prekazok polda poctu prekazok
+ * TODO: lepsiu mriezku
+ */

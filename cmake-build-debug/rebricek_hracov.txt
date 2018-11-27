@@ -1,10 +1,10 @@
 Lukas dosiahol skore : 20
 Peter dosiahol skore : 15
 Filip dosiahol skore : 12
-1 dosiahol skore : 11
 Vaclav dosiahol skore : 10
 Zdenda dosiahol skore : 9
-d dosiahol skore : 9
-tes dosiahol skore : 9
 Adam dosiahol skore : 8
 Ondrej dosiahol skore : 7
+1 dosiahol skore : 6
+Samo dosiahol skore : 5
+Matus dosiahol skore : 4

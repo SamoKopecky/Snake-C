@@ -1,33 +1,24 @@
+#include <afxres.h>
+#include <time.h>
 #include <stdbool.h>
-#include <winnt.h>
+#include "fileFunctions.h"
 
-struct twoDArray {
-    int count;
-    int **rows;
-};
+bool isApple(short x, short y, struct coordinates *coordinates);
 
-void
-getValuesGameplayFunctions(HANDLE *ptrHStdout, char *ptrInputKey, bool *ptrGameOver, char *ptrDirection, int *ptrScore,
-                           int ptrObstacleArray[52][2], const int *ptrObstacleArrayLength, int *ptrPlaygroundHeight,
-                           int *ptrPlaygroundWidth, struct twoDArray *ptrSnakeCords, int ptrAppleCords[8][2],
-                           int *ptrAppleCordsLength);
+bool isBorder(short x, short y);
 
-bool isApple(int x, int y);
+bool isSnake(short x, short y, struct coordinates *coordinates);
 
-bool isBorder(int x, int y);
+bool isObstacle(short x, short y, struct coordinates *coordinates);
 
-bool isSnake(int x, int y);
+bool isSnakeBody(short x, short y, struct coordinates *coordinates);
 
-bool isObstacle(int x, int y);
+void printSnake(struct coordinates *coordinates, HANDLE *hStdout);
 
-bool isSnakeBody(int x, int y);
+void changeDirection(struct playerInput *playerInput);
 
-void printSnake();
+void updateSnake(struct coordinates *coordinates, struct playerInput *playerInput, bool *gameOver);
 
-void changeDirection();
+void updateScore(HANDLE *hStdout, struct playerInfo *playerInfo);
 
-void updateSnake();
-
-void updateScore();
-
-void eatApple();
+void eatApple(struct coordinates *coordinates, HANDLE *hStdout, struct playerInfo *playerInfo);

@@ -1,22 +1,17 @@
 #include "gameplayFunctions.h"
 
-void
-getValuesInitializationOfGame(char ptrPlayerName[10], int *ptrDiff, int *ptrPlaygroundHeight, int *ptrPlaygroundWidth,
-                              char ptrPlayground[25][50], int *ptrScore, struct twoDArray *ptrSnakeCords,
-                              int ptrAppleCords[8][2], int *ptrAppleCordsLength);
-
-void getPlayerName();
+void getPlayerName(struct playerInfo *playerInfo);
 
 void printInstructions();
 
-void getDifficulty();
+void getDifficulty(struct playerInput *playerInput);
 
-char getCorrectCharacter(int x, int y);
+char getCorrectCharacter(short x, short y, struct coordinates *coordinates);
 
-char getCorrectBorder(int x, int y);
+char getCorrectBorder(short x, short y);
 
-void updatePlayground();
+void updatePlayground(struct coordinates *coordinates, struct playerInfo *playerInfo);
 
-void firstAlloc();
+void firstAlloc(struct coordinates *coordinates);
 
-void importApples();
+void importApples(struct coordinates *coordinates);

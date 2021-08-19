@@ -5,6 +5,6 @@ Filip dosiahol skore : 12
 Vaclav dosiahol skore : 10
 Zdenda dosiahol skore : 9
 Adam dosiahol skore : 8
+samo dosiahol skore : 8
 Ondrej dosiahol skore : 7
 twa dosiahol skore : 7
-Samo dosiahol skore : 5
